@@ -1,7 +1,19 @@
 module Contentful
   module MiddlemanPages
-    class PagexExtension < ::Middleman::Extension
-      self.supports_multiple_instances = false
+    module ResourceInstanceMethods
+      attr_accessor :resource_options, :template_locals
+
+      def render(opts = {}, locs ={}, &block)
+        super(opts, template_locals, &block)
+      end
+
+      def get_source_file
+        resource_options[:template]
+      end
+    end
+
+    class Extension < ::Middleman::Extension
+      self.supports_multiple_instances = true
 
       option :data, nil,
         'The name of the Space and the Content Type to be used as the source of data'
@@ -16,32 +28,33 @@ module Contentful
         massage_options
       end
 
+      def manipulate_resource_list(resources)
+        options.data.map do |entry_id, entry_data|
+          resource = ::Middleman::Sitemap::Resource.new(
+            @app.sitemap,
+            "#{options.prefix}/#{entry_id}.html"
+          )
+
+          resource.extend ResourceInstanceMethods
+          resource.template_locals = entry_data
+          resource.resource_options = {template: ::File.expand_path(options.template)}
+
+          resource
+        end
+      end
+
       private
       def massage_options
         massage_data_option
       end
 
       def massage_data_option
-        data_option = options.data
+        data_option                   = options.data
         space_name, content_type_name = *data_option.split(".")
-        p space_name
-        p content_type_name
+
+        options.data = app.data.send(space_name).fetch(content_type_name)
       end
-      #def manipulate_resource_list(resources)
-      #  options.data.map do |element|
-      #    resource = ::Middleman::Sitemap::Resource.new(
-      #      @app.sitemap,
-      #      "#{options.prefix}/#{element.first}.html"
-      #    )
 
-      #    resource.extend ResourceInstanceMethods
-      #    resource.template_locals = element[1]
-      #    resource.resource_options = {template: File.expand_path(options.template)}
-
-      #    resource
-      #  end
-
-      #end
     end
   end
 end
