@@ -86,7 +86,8 @@ module Contentful
 
       def massage_permalink_option
         if options.permalink.nil?
-          options.permalink = ::File.join(options.prefix, "{id}.html" )
+          template_dirname  = Pathname(options.template).dirname
+          options.permalink = ::File.join(template_dirname, "{id}.html" )
         end
       end
 
