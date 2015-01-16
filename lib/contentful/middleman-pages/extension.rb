@@ -1,20 +1,18 @@
 require 'addressable/template'
 require 'pathname'
+require 'hashugar'
 
 module Contentful
   module MiddlemanPages
     module ResourceInstanceMethods
-      attr_accessor :template_locals
-
-      def render(opts = {}, locs ={}, &block)
-        super(opts, template_locals, &block)
-      end
+      attr_accessor :data
 
       def ignored?
         # As we are ignoring the template used to render this resource
         # the resources won't be rendered. We have to force it.
         false
       end
+
     end
 
     module UriTemplate
@@ -47,7 +45,7 @@ module Contentful
       end
 
       def manipulate_resource_list(resources)
-        resources + options.data.map do |entry_id, entry_data|
+        new_resources = options.data.map do |entry_id, entry_data|
           expanded_permalink = expand_permalink entry_data
           resource           = ::Middleman::Sitemap::Resource.new(
             @app.sitemap,
@@ -56,8 +54,14 @@ module Contentful
           )
 
           resource.extend ResourceInstanceMethods
-          resource.template_locals = entry_data
+          resource.data = entry_data
+          resource.add_metadata locals: entry_data
 
+          resource
+        end
+
+        (resources + new_resources).map do |resource|
+          resource.add_metadata locals: {contentful: {@space_name => {@content_type_name => new_resources}}.to_hashugar}
           resource
         end
       end
@@ -89,6 +93,9 @@ module Contentful
       def massage_data_option
         data_option                   = options.data
         space_name, content_type_name = *data_option.split(".")
+
+        @space_name        = space_name
+        @content_type_name = content_type_name
 
         options.data = app.data.send(space_name).fetch(content_type_name)
       end
