@@ -1,3 +1,6 @@
+require 'addressable/template'
+require 'pathname'
+
 module Contentful
   module MiddlemanPages
     module ResourceInstanceMethods
@@ -14,7 +17,19 @@ module Contentful
       end
     end
 
+    module UriTemplate
+      def uri_template(uri)
+        Addressable::Template.new uri
+      end
+
+      def apply_uri_template(template, data)
+        template.expand data
+      end
+    end
+
     class Extension < ::Middleman::Extension
+      include UriTemplate
+
       self.supports_multiple_instances = true
 
       option :data, nil,
@@ -22,6 +37,7 @@ module Contentful
       option :prefix, nil, ""
       option :template, nil,
         'The path to the template that will be used to generate a file for every entry in the given data'
+      option :permalink, nil, ""
 
       #
       # Middleman hooks
@@ -32,9 +48,10 @@ module Contentful
 
       def manipulate_resource_list(resources)
         resources + options.data.map do |entry_id, entry_data|
-          resource = ::Middleman::Sitemap::Resource.new(
+          expanded_permalink = expand_permalink entry_data
+          resource           = ::Middleman::Sitemap::Resource.new(
             @app.sitemap,
-            "#{options.prefix}/#{entry_id}.html",
+            expanded_permalink,
             options.template
           )
 
@@ -46,8 +63,17 @@ module Contentful
       end
 
       private
+      def expand_permalink(entry_data)
+        apply_uri_template(uri_template, entry_data).to_s
+      end
+
+      def uri_template
+        @path_template ||= super options.permalink
+      end
+
       def massage_options
         massage_data_option
+        massage_permalink_option
         massage_template_option
       end
 
@@ -56,6 +82,12 @@ module Contentful
         space_name, content_type_name = *data_option.split(".")
 
         options.data = app.data.send(space_name).fetch(content_type_name)
+      end
+
+      def massage_permalink_option
+        if options.permalink.nil?
+          options.permalink = ::File.join(options.prefix, "{id}.html" )
+        end
       end
 
       def massage_template_option
