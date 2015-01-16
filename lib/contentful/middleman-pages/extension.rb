@@ -4,7 +4,7 @@ require 'pathname'
 module Contentful
   module MiddlemanPages
     module ResourceInstanceMethods
-      attr_accessor :resource_options, :template_locals
+      attr_accessor :template_locals
 
       def render(opts = {}, locs ={}, &block)
         super(opts, template_locals, &block)
