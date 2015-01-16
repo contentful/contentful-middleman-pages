@@ -63,6 +63,13 @@ module Contentful
       end
 
       private
+      def apply_prefix_option
+        unless options.prefix.nil?
+          options.template  = ::File.join(options.prefix, options.template)
+          options.permalink = ::File.join(options.prefix, options.permalink) unless options.permalink.nil?
+        end
+      end
+
       def expand_permalink(entry_data)
         apply_uri_template(uri_template, entry_data).to_s
       end
@@ -72,6 +79,8 @@ module Contentful
       end
 
       def massage_options
+        apply_prefix_option
+
         massage_data_option
         massage_permalink_option
         massage_template_option
