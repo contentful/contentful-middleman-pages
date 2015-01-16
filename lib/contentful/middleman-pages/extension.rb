@@ -7,8 +7,10 @@ module Contentful
         super(opts, template_locals, &block)
       end
 
-      def get_source_file
-        resource_options[:template]
+      def ignored?
+        # As we are ignoring the template used to render this resource
+        # the resources won't be rendered. We have to force it.
+        false
       end
     end
 
@@ -29,15 +31,15 @@ module Contentful
       end
 
       def manipulate_resource_list(resources)
-        options.data.map do |entry_id, entry_data|
+        resources + options.data.map do |entry_id, entry_data|
           resource = ::Middleman::Sitemap::Resource.new(
             @app.sitemap,
-            "#{options.prefix}/#{entry_id}.html"
+            "#{options.prefix}/#{entry_id}.html",
+            options.template
           )
 
           resource.extend ResourceInstanceMethods
           resource.template_locals = entry_data
-          resource.resource_options = {template: ::File.expand_path(options.template)}
 
           resource
         end
@@ -46,6 +48,7 @@ module Contentful
       private
       def massage_options
         massage_data_option
+        massage_template_option
       end
 
       def massage_data_option
@@ -53,6 +56,14 @@ module Contentful
         space_name, content_type_name = *data_option.split(".")
 
         options.data = app.data.send(space_name).fetch(content_type_name)
+      end
+
+      def massage_template_option
+        # Ignore the template used to render this page. Otherwise
+        # Middleman will try to render it but the resource won't have
+        # the required local variables and there'll be an error
+        app.ignore options.template
+        options.template = ::File.join(app.source_dir, options.template)
       end
 
     end
