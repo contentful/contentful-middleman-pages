@@ -37,6 +37,12 @@ module Contentful
         'The path to the template that will be used to generate a file for every entry in the given data'
       option :permalink, nil, ""
 
+      def initialize(app, options, &block)
+        super
+
+        @contentful_resources = []
+      end
+
       #
       # Middleman hooks
       #
@@ -44,8 +50,17 @@ module Contentful
         massage_options
       end
 
+      def before_build
+        @app.sitemap.resources.each do |resource|
+          contentful_metadata              = resource.metadata.fetch(:locals).fetch(:contentful, {}.to_hashugar)
+          contentful_metadata[@space_name] = {@content_type_name => @contentful_resources}.to_hashugar
+
+          resource.add_metadata locals: {contentful: contentful_metadata}
+        end
+      end
+
       def manipulate_resource_list(resources)
-        new_resources = options.data.map do |entry_id, entry_data|
+        @contentful_resources += options.data.map do |entry_id, entry_data|
           expanded_permalink = expand_permalink entry_data
           resource           = ::Middleman::Sitemap::Resource.new(
             @app.sitemap,
@@ -60,10 +75,7 @@ module Contentful
           resource
         end
 
-        (resources + new_resources).map do |resource|
-          resource.add_metadata locals: {contentful: {@space_name => {@content_type_name => new_resources}}.to_hashugar}
-          resource
-        end
+        resources + @contentful_resources
       end
 
       private
