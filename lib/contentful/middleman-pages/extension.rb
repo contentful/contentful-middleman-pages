@@ -13,6 +13,20 @@ module Contentful
         false
       end
 
+      def respond_to?(symbol)
+         key_in_data(symbol) || super
+      end
+
+      def method_missing(symbol, *args, &block)
+        return data.fetch(symbol.to_s) if key_in_data(symbol)
+        super
+      end
+
+      private
+      def key_in_data(key)
+        data.key? key.to_s
+      end
+
     end
 
     module UriTemplate
