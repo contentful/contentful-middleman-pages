@@ -46,10 +46,15 @@ module Contentful
 
       option :data, nil,
         'The name of the Space and the Content Type to be used as the source of data'
-      option :prefix, nil, ""
+
+      option :prefix, nil,
+        'The prefix that will be prepended to the values in template and permalink options'
+
       option :template, nil,
         'The path to the template that will be used to generate a file for every entry in the given data'
-      option :permalink, nil, ""
+
+      option :permalink, nil,
+        'The template used to generate the destination path of an entry'
 
       def initialize(app, options, &block)
         super
