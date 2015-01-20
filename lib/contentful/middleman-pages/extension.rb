@@ -79,7 +79,11 @@ module Contentful
       end
 
       def manipulate_resource_list(resources)
-        @contentful_resources += options.data.map do |entry_id, entry_data|
+        return resources unless @app.build?
+
+        data = @app.data.send(@space_name).fetch(@content_type_name)
+
+        @contentful_resources += data.map do |entry_id, entry_data|
           expanded_permalink = expand_permalink entry_data
           resource           = ::Middleman::Sitemap::Resource.new(
             @app.sitemap,
@@ -127,8 +131,6 @@ module Contentful
 
         @space_name        = space_name
         @content_type_name = content_type_name
-
-        options.data = app.data.send(space_name).fetch(content_type_name)
       end
 
       def massage_permalink_option
