@@ -79,11 +79,7 @@ module Contentful
       end
 
       def manipulate_resource_list(resources)
-        return resources unless @app.build?
-
-        data = @app.data.send(@space_name).fetch(@content_type_name)
-
-        @contentful_resources += data.map do |entry_id, entry_data|
+        @contentful_resources += options.data.map do |entry_id, entry_data|
           expanded_permalink = expand_permalink entry_data
           resource           = ::Middleman::Sitemap::Resource.new(
             @app.sitemap,
@@ -131,6 +127,14 @@ module Contentful
 
         @space_name        = space_name
         @content_type_name = content_type_name
+
+        unless app.data[space_name] && app.data[space_name][content_type_name]
+          app.logger.warn "contentful_pages: no local data for key #{data_option}"
+          options.data = []
+          return
+        end
+
+        options.data = app.data[space_name].fetch(content_type_name)
       end
 
       def massage_permalink_option
@@ -147,7 +151,6 @@ module Contentful
         app.ignore options.template
         options.template = ::File.join(app.source_dir, options.template)
       end
-
     end
   end
 end
