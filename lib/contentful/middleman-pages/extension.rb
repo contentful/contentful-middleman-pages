@@ -79,6 +79,7 @@ module Contentful
       end
 
       def manipulate_resource_list(resources)
+        new_resources_list = resources
         @contentful_resources += options.data.map do |entry_id, entry_data|
           expanded_permalink = expand_permalink entry_data
           resource           = ::Middleman::Sitemap::Resource.new(
@@ -91,10 +92,16 @@ module Contentful
           resource.data = entry_data
           resource.add_metadata locals: entry_data
 
+          if (index = is_existing_resource?(resource, new_resources_list))
+            new_resources_list[index] = resource
+          else
+            new_resources_list << resource
+          end
+
           resource
         end
 
-        resources + @contentful_resources
+        new_resources_list
       end
 
       private
@@ -107,6 +114,13 @@ module Contentful
 
       def expand_permalink(entry_data)
         apply_uri_template(uri_template, entry_data).to_s
+      end
+
+      def is_existing_resource?(resource, resources)
+        resource_id = resource.data.fetch("id")
+        resources.find_index do |existing_resource|
+          existing_resource.data["id"] == resource_id
+        end
       end
 
       def uri_template
