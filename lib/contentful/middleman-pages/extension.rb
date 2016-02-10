@@ -69,15 +69,6 @@ module Contentful
         massage_options
       end
 
-      def before_build
-        @app.sitemap.resources.each do |resource|
-          contentful_metadata              = resource.metadata.fetch(:locals).fetch(:contentful, {}.to_hashugar)
-          contentful_metadata[@space_name] = {@content_type_name => @contentful_resources}.to_hashugar
-
-          resource.add_metadata locals: {contentful: contentful_metadata}
-        end
-      end
-
       def manipulate_resource_list(resources)
         new_resources_list = resources
         @contentful_resources += options.data.map do |entry_id, entry_data|
@@ -99,6 +90,13 @@ module Contentful
           end
 
           resource
+        end
+
+        (resources + @contentful_resources).map do |resource|
+           contentful_metadata   = resource.metadata.fetch(:locals).fetch(:contentful, {}.to_hashugar)
+           contentful_metadata[@space_name] = {@content_type_name => @contentful_resources}.to_hashugar
+           resource.add_metadata locals: {contentful: contentful_metadata}
+           resource
         end
 
         new_resources_list
