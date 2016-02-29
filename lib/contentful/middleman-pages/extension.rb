@@ -42,6 +42,8 @@ module Contentful
     class Extension < ::Middleman::Extension
       include UriTemplate
 
+      SOURCE_PATH = 'source'
+
       self.supports_multiple_instances = true
 
       option :data, nil,
@@ -106,6 +108,10 @@ module Contentful
       def apply_prefix_option
         unless options.prefix.nil?
           options.template  = ::File.join(options.prefix, options.template)
+
+          template_path = ::File.join(::File.expand_path(::Dir.pwd), SOURCE_PATH, options.template)
+          app.logger.warn "contentful_pages: template not found at #{template_path}" unless ::File.exist?(template_path)
+
           options.permalink = ::File.join(options.prefix, options.permalink) unless options.permalink.nil?
         end
       end
