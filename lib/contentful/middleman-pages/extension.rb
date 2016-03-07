@@ -42,6 +42,8 @@ module Contentful
     class Extension < ::Middleman::Extension
       include UriTemplate
 
+      SOURCE_PATH = 'source'
+
       self.supports_multiple_instances = true
 
       option :data, nil,
@@ -69,15 +71,6 @@ module Contentful
         massage_options
       end
 
-      def before_build
-        @app.sitemap.resources.each do |resource|
-          contentful_metadata              = resource.metadata.fetch(:locals).fetch(:contentful, {}.to_hashugar)
-          contentful_metadata[@space_name] = {@content_type_name => @contentful_resources}.to_hashugar
-
-          resource.add_metadata locals: {contentful: contentful_metadata}
-        end
-      end
-
       def manipulate_resource_list(resources)
         new_resources_list = resources
         @contentful_resources += options.data.map do |entry_id, entry_data|
@@ -101,6 +94,13 @@ module Contentful
           resource
         end
 
+        (resources + @contentful_resources).map do |resource|
+           contentful_metadata   = resource.metadata.fetch(:locals).fetch(:contentful, {}.to_hashugar)
+           contentful_metadata[@space_name] = {@content_type_name => @contentful_resources}.to_hashugar
+           resource.add_metadata locals: {contentful: contentful_metadata}
+           resource
+        end
+
         new_resources_list
       end
 
@@ -108,6 +108,10 @@ module Contentful
       def apply_prefix_option
         unless options.prefix.nil?
           options.template  = ::File.join(options.prefix, options.template)
+
+          template_path = ::File.join(::File.expand_path(::Dir.pwd), SOURCE_PATH, options.template)
+          app.logger.warn "contentful_pages: template not found at #{template_path}" unless ::File.exist?(template_path)
+
           options.permalink = ::File.join(options.prefix, options.permalink) unless options.permalink.nil?
         end
       end
