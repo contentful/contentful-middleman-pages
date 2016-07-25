@@ -1,6 +1,6 @@
 # Contentful Middleman Pages
 
-This gem bundles an extension to [Middleman](https://middlemanapp.com/). The goal of this extension is to simplify the usage withing Middleman of data imported from Contentul (using the [contentful_middleman](https://github.com/contentful/contentful_middlema) gem).
+This gem bundles an extension to [Middleman](https://middlemanapp.com/). The goal of this extension is to simplify the usage withing Middleman of data imported from Contentul (using the [contentful_middleman](https://github.com/contentful/contentful_middleman) gem).
 
 ## Table of contents
 * [Installation](#installation)
