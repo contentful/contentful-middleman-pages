@@ -84,6 +84,7 @@ module Contentful
           resource.extend ResourceInstanceMethods
           resource.data = entry_data
           resource.add_metadata locals: entry_data
+          resource.add_metadata page: entry_data
 
           if (index = is_existing_resource?(resource, new_resources_list))
             new_resources_list[index] = resource
