@@ -1,6 +1,12 @@
 # Contentful Middleman Pages
 
-This gem bundles an extension to [Middleman](https://middlemanapp.com/). The goal of this extension is to simplify the usage withing Middleman of data imported from Contentul (using the [contentful_middleman](https://github.com/contentful/contentful_middlema) gem).
+This gem bundles an extension to [Middleman](https://middlemanapp.com/).
+The goal of this extension is to simplify the usage withing Middleman of data imported from Contentul
+(using the [contentful_middleman](https://github.com/contentful/contentful_middlema) gem).
+
+> The main release works for Middleman v3 - The most used version
+>
+> If you want support for Middleman v4 - Please create an issue so we can discuss about it
 
 ## Table of contents
 * [Installation](#installation)
@@ -37,14 +43,15 @@ end
 
 Parameter | Required | Description
 ----------|----------|------------
-data | true | Concatenation of the space name and content type (same names used when configuring the contentful_middleman extension) that identifies the entries to be used
-template | true | Path to the template used to render every entry
-prefix | false | String that will be prepended to the value specified in `template` and `permalink`
-permalink | false | Uri template to specify a custom destination path for the resulting pages. Can interpolate values available in the entries
+data      | `true`   | Concatenation of the space name and content type (same names used when configuring the contentful_middleman extension) that identifies the entries to be used
+template  | `true`   | Path to the template used to render every entry
+prefix    | `false`  | String that will be prepended to the value specified in `template` and `permalink`
+permalink | `false`  | Uri template to specify a custom destination path for the resulting pages. Can interpolate values available in the entries
 
 #### Extension configuration: example
 
-Consider the following configuration of the contentful_middleman gem. On this case we are assigning the name partners to the space and name partner to the content type.
+Consider the following configuration of the `contentful_middleman` gem.
+On this case we are assigning the name partners to the space and name partner to the content type.
 
 ```ruby
 activate :contentful do |f|
@@ -55,16 +62,19 @@ activate :contentful do |f|
 end
 ```
 
-On the activation below we are fetching the entries stored under the key `partners.partner`. We will render each of the entries using the template `source/random.html.erb`.
+On the activation below we are fetching the entries stored under the key `partners.partner`.
+We will render each of the entries using the template `source/random.html.erb`.
 
 ```ruby
-activate :contentful do |extension|
+activate :contentful_pages do |extension|
   extension.data      = 'partners.partner'
   extension.template  = 'random.html.erb'
 end
 ```
 
-On the activation below we are using the same entries. We have set the prefix to `partners` and so we will render each of the entries using the template `source/partners/random/html.erb`.
+On the activation below we are using the same entries.
+We have set the prefix to `partners` and so we will render each of the entries using the template `source/partners/random/html.erb`.
+
 ```ruby
 activate :contentful_pages do |extension|
   extension.data      = 'partners.partner'
@@ -74,7 +84,10 @@ end
 ```
 
 
-On the activation below we are using the same entries. We have again set the prefix but this time we are using a custom permalink. Resulting pages will be available under `partners/my/nice/permalink/xyz.html` where `xyz` is the title of the entry used to render the page.
+On the activation below we are using the same entries.
+We have again set the prefix but this time we are using a custom permalink.
+Resulting pages will be available under `partners/my/nice/permalink/xyz.html` where `xyz` is the title of the entry used to render the page.
+
 ```ruby
 activate :contentful_pages do |extension|
   extension.data      = 'partners.partner'
@@ -96,12 +109,12 @@ Inside every template you will have access to the followig set of local variable
 Consider the following Middleman configuration:
 
 ```ruby
-activate :contentful do |extension|
+activate :contentful_pages do |extension|
   extension.data      = 'partners.partner'
   extension.template  = 'random.html.erb'
 end
 
-activate :contentful do |extension|
+activate :contentful_pages do |extension|
   extension.data      = 'blog.post'
   extension.template  = 'post.html.erb'
 end
@@ -137,12 +150,15 @@ And inside of every template you will have access to `contentful.partners.partne
 </ul>
 ```
 
-Please note that all the elements in `contentful.partners.partner` and `contentful.blog.post` are Middleman [resources](http://www.rubydoc.info/github/middleman/middleman/Middleman/Sitemap/Resource) and so all its methods are available to use.
+Please note that all the elements in `contentful.partners.partner` and `contentful.blog.post` are
+Middleman [resources](http://www.rubydoc.info/github/middleman/middleman/Middleman/Sitemap/Resource) and so all its methods are available to use.
 
 
 ### Blogging
 
-If you want to create a blog with Middleman you should use the officially supported extension [middleman-blog](https://github.com/middleman/middleman-blog). To use the `middleman-blog` extension with data imported from contentful you will have to start writing a configuration like this:
+If you want to create a blog with Middleman you should use the officially supported extension
+[middleman-blog](https://github.com/middleman/middleman-blog). To use the `middleman-blog` extension
+with data imported from contentful you will have to start writing a configuration like this:
 
 ```ruby
 activate :blog do |blog|
@@ -151,7 +167,10 @@ activate :blog do |blog|
 end
 ```
 
-The relevant part of the previous snippet is the `blog.source` configuration parameter.  This parameter is used by the `middleman-blog` extension to know which resources it has to use to create the blog. To make resources created with the `contentful-middleman-pages` available to the blog extension set the permalink of each of these resources to a value that matches the `blog.sources` expression. For example:
+The relevant part of the previous snippet is the `blog.source` configuration parameter.
+This parameter is used by the `middleman-blog` extension to know which resources it has to use to
+create the blog. To make resources created with the `contentful-middleman-pages` available to
+the blog extension set the permalink of each of these resources to a value that matches the `blog.sources` expression. For example:
 
 ```ruby
 activate :contentful_pages do |extension|
