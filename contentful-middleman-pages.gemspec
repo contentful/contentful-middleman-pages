@@ -22,6 +22,6 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "hashugar", "~> 1.0"
   spec.add_dependency "addressable", "~> 2.3"
-  spec.add_dependency "middleman-core", "~> 3.0"
+  spec.add_dependency "middleman-core", ">= 3.0"
   spec.add_dependency "contentful_middleman", "~> 1.3"
 end
